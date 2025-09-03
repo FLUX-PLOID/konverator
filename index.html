@@ -1,117 +1,55 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>File ke URL Converter</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0a0a0a;
-      color: #e0e0e0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(0,255,255,0.3), 0 0 40px rgba(255,0,0,0.2);
-      text-align: center;
-      width: 90%;
-      max-width: 500px;
-    }
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-      color: cyan;
-    }
-    input[type="file"] {
-      margin: 15px 0;
-      padding: 10px;
-      border: 2px dashed cyan;
-      border-radius: 10px;
-      background: #111;
-      color: white;
-      cursor: pointer;
-    }
-    button {
-      background: linear-gradient(45deg, cyan, red);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 12px;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: transform 0.2s;
-    }
-    button:hover {
-      transform: scale(1.05);
-    }
-    textarea {
-      width: 100%;
-      height: 120px;
-      margin-top: 20px;
-      border-radius: 10px;
-      border: none;
-      padding: 10px;
-      background: #111;
-      color: cyan;
-      font-size: 0.9rem;
-    }
-    .preview {
-      margin-top: 20px;
-    }
-    .preview img, .preview audio {
-      max-width: 100%;
-      margin-top: 10px;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konversi File ke URL</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Konversi File ke URL</h1>
-    <input type="file" id="fileInput" accept="image/*,audio/*" />
-    <br>
-    <button onclick="convertFile()">Konversi</button>
-    <textarea id="output" placeholder="Hasil URL muncul di sini..." readonly></textarea>
-    <div class="preview" id="preview"></div>
+    <h1>Konversi File ke URL 🔗</h1>
+    <form id="uploadForm">
+      <input type="file" id="fileInput" required />
+      <button type="submit">Upload & Dapatkan Link</button>
+    </form>
+    <div id="result"></div>
   </div>
 
   <script>
-    function convertFile() {
-      const fileInput = document.getElementById("fileInput");
-      const output = document.getElementById("output");
-      const preview = document.getElementById("preview");
+    const form = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("fileInput");
+    const result = document.getElementById("result");
 
-      if (!fileInput.files[0]) {
-        alert("Pilih file dulu sayang 😗");
-        return;
-      }
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = fileInput.files[0];
+      if (!file) return alert("Pilih file dulu!");
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const dataURL = e.target.result;
-        output.value = dataURL;
+      const formData = new FormData();
+      formData.append("file", file);
 
-        preview.innerHTML = "";
-        if (fileInput.files[0].type.startsWith("image/")) {
-          const img = document.createElement("img");
-          img.src = dataURL;
-          preview.appendChild(img);
-        } else if (fileInput.files[0].type.startsWith("audio/")) {
-          const audio = document.createElement("audio");
-          audio.src = dataURL;
-          audio.controls = true;
-          preview.appendChild(audio);
+      result.innerHTML = "⏳ Uploading...";
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+
+        if (data.url) {
+          result.innerHTML = `
+            ✅ File berhasil diupload!<br>
+            <a href="${data.url}" target="_blank">${data.url}</a>
+          `;
+        } else {
+          result.innerHTML = "❌ Gagal upload.";
         }
-      };
-      reader.readAsDataURL(fileInput.files[0]);
-    }
+      } catch (err) {
+        result.innerHTML = "⚠️ Error: " + err.message;
+      }
+    });
   </script>
 </body>
 </html>
