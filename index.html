@@ -3,426 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File to URL Converter</title>
+    <title>Konverator - Ubah Foto dan Audio ke URL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
+            background: linear-gradient(135deg, #000000 0%, #111111 100%); /* Gradient modern hitam ke dark gray */
+            color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
-
-        .container {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #00ffff;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, #00ffff, #ff0040);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #cccccc;
-            font-size: 1.1rem;
-        }
-
-        .upload-area {
-            border: 3px dashed #00ffff;
-            border-radius: 15px;
-            padding: 60px 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upload-area:hover {
-            border-color: #ff0040;
-            background: rgba(255, 0, 64, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .upload-area.dragover {
-            border-color: #ff0040;
-            background: rgba(255, 0, 64, 0.1);
-            transform: scale(1.02);
-        }
-
-        .upload-icon {
-            font-size: 4rem;
+        .glow-text {
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
             color: #00ffff;
-            margin-bottom: 20px;
-            transition: color 0.3s ease;
         }
-
-        .upload-area:hover .upload-icon {
-            color: #ff0040;
+        .btn-glow {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px #00ffff;
         }
-
-        .upload-text {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: #ffffff;
+        .btn-glow:hover {
+            box-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff;
+            transform: scale(1.05);
         }
-
-        .upload-subtext {
-            color: #999999;
-            font-size: 0.9rem;
+        .btn-red-glow {
+            box-shadow: 0 0 5px #ff0000;
         }
-
-        .file-input {
-            display: none;
+        .btn-red-glow:hover {
+            box-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000;
+            transform: scale(1.05);
         }
-
-        .file-info {
-            background: rgba(0, 255, 255, 0.1);
+        .section-glow {
+            background: linear-gradient(135deg, #222222 0%, #333333 100%);
+            border-radius: 12px;
             border: 1px solid #00ffff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: none;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
         }
-
-        .file-name {
-            font-weight: bold;
-            color: #00ffff;
-            margin-bottom: 5px;
+        .result-glow {
+            background: linear-gradient(135deg, #111111 0%, #222222 100%);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), inset 0 0 10px rgba(0, 255, 255, 0.1);
         }
-
-        .file-size {
+        .input-glow:focus {
+            outline: none;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        .footer-glow {
             color: #cccccc;
-            font-size: 0.9rem;
-        }
-
-        .convert-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(45deg, #ff0040, #00ffff);
-            border: none;
-            border-radius: 10px;
-            color: #ffffff;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .convert-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255, 0, 64, 0.3);
-        }
-
-        .convert-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .result-area {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #333333;
-            border-radius: 10px;
-            padding: 20px;
-            display: none;
-        }
-
-        .result-title {
-            color: #00ffff;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .url-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .url-input {
-            flex: 1;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #555555;
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 0.9rem;
-        }
-
-        .copy-btn {
-            padding: 12px 20px;
-            background: #00ffff;
-            color: #000000;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .copy-btn:hover {
-            background: #ff0040;
-            color: #ffffff;
-        }
-
-        .success-message {
-            color: #00ff00;
-            font-size: 0.9rem;
-            text-align: center;
-            display: none;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            margin: 20px 0;
-            overflow: hidden;
-            display: none;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ffff, #ff0040);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
-                margin: 10px;
-            }
-
-            .title {
-                font-size: 2rem;
-            }
-
-            .upload-area {
-                padding: 40px 15px;
-            }
-
-            .url-container {
-                flex-direction: column;
-            }
+            text-shadow: 0 0 5px #00ffff;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1 class="title">File to URL</h1>
-            <p class="subtitle">Konversi file Anda menjadi URL yang dapat dibagikan</p>
-        </div>
+<body class="font-sans min-h-screen">
+    <header class="header text-center py-12 px-4">
+        <h1 class="text-4xl md:text-5xl font-bold glow-text mb-2">Konverator</h1>
+        <p class="text-lg md:text-xl text-gray-300">Ubah foto dan audio Anda menjadi URL data modern dan siap pakai.</p>
+    </header>
 
-        <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📁</div>
-            <div class="upload-text">Klik atau seret file ke sini</div>
-            <div class="upload-subtext">Mendukung semua jenis file (Maks. 10MB)</div>
-            <input type="file" class="file-input" id="fileInput" accept="*/*">
-        </div>
-
-        <div class="file-info" id="fileInfo">
-            <div class="file-name" id="fileName"></div>
-            <div class="file-size" id="fileSize"></div>
-        </div>
-
-        <div class="progress-bar" id="progressBar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-
-        <button class="convert-btn" id="convertBtn">🚀 Konversi ke URL</button>
-
-        <div class="result-area" id="resultArea">
-            <div class="result-title">✅ URL berhasil dibuat:</div>
-            <div class="url-container">
-                <input type="text" class="url-input" id="urlInput" readonly>
-                <button class="copy-btn" id="copyBtn">📋 Salin</button>
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Bagian Foto -->
+        <section class="mb-8 section-glow p-6">
+            <h2 class="text-2xl mb-4 glow-text">Konversi Foto ke URL</h2>
+            <div class="space-y-4">
+                <input type="file" id="imageInput" accept="image/*" class="input-glow block w-full p-3 bg-gray-800 border border-cyan-500 rounded-lg text-white">
+                <div class="flex space-x-4">
+                    <button class="btn-glow bg-cyan-400 text-black font-semibold py-2 px-4 rounded-lg" onclick="convertImage()">Konversi Gambar</button>
+                    <button class="btn-red-glow bg-red-500 text-white font-semibold py-2 px-4 rounded-lg" onclick="clearImage()">Bersihkan</button>
+                </div>
+                <div id="imageResult" class="result-glow p-4" style="display: none;">
+                    <p class="font-semibold mb-2 glow-text">URL Gambar:</p>
+                    <p id="imageUrl" class="break-all text-sm bg-gray-900 p-2 rounded mb-4"></p>
+                    <p class="font-semibold mb-2 glow-text">Preview:</p>
+                    <img id="imagePreview" alt="Preview penuh-resolution dari gambar yang dikonsersi, menampilkan detail utuh file" style="max-width: 100%; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); display: none;" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e6604e5-5c4c-440b-ba92-2f3c6c152f70.png">
+                </div>
+                <p id="imageError" class="text-red-500 mt-2 font-semibold glow-text" style="display: none;">⚠️ Error: Pastikan file gambar valid!</p>
             </div>
-            <div class="success-message" id="successMessage">URL berhasil disalin ke clipboard!</div>
-        </div>
-    </div>
+        </section>
+
+        <!-- Bagian Audio -->
+        <section class="section-glow p-6">
+            <h2 class="text-2xl mb-4 glow-text">Konversi Audio ke URL</h2>
+            <div class="space-y-4">
+                <input type="file" id="audioInput" accept="audio/*" class="input-glow block w-full p-3 bg-gray-800 border border-cyan-500 rounded-lg text-white">
+                <div class="flex space-x-4">
+                    <button class="btn-glow bg-cyan-400 text-black font-semibold py-2 px-4 rounded-lg" onclick="convertAudio()">Konversi Audio</button>
+                    <button class="btn-red-glow bg-red-500 text-white font-semibold py-2 px-4 rounded-lg" onclick="clearAudio()">Bersihkan</button>
+                </div>
+                <div id="audioResult" class="result-glow p-4" style="display: none;">
+                    <p class="font-semibold mb-2 glow-text">URL Audio:</p>
+                    <p id="audioUrl" class="break-all text-sm bg-gray-900 p-2 rounded mb-4"></p>
+                    <p class="font-semibold mb-2 glow-text">Preview:</p>
+                    <audio id="audioPreview" controls class="border border-cyan-500 rounded" style="display: none;"></audio>
+                </div>
+                <p id="audioError" class="text-red-500 mt-2 font-semibold glow-text" style="display: none;">⚠️ Error: Pastikan file audio valid!</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-6 footer-glow">
+        <p class="text-lg">© 2023 Konverator. Modern, Glow-Enhanced & Ready for Vercel Deployment!</p>
+    </footer>
 
     <script>
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileName = document.getElementById('fileName');
-        const fileSize = document.getElementById('fileSize');
-        const convertBtn = document.getElementById('convertBtn');
-        const resultArea = document.getElementById('resultArea');
-        const urlInput = document.getElementById('urlInput');
-        const copyBtn = document.getElementById('copyBtn');
-        const successMessage = document.getElementById('successMessage');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
+        function convertImage() {
+            const input = document.getElementById('imageInput');
+            const resultDiv = document.getElementById('imageResult');
+            const urlPara = document.getElementById('imageUrl');
+            const preview = document.getElementById('imagePreview');
+            const errorPara = document.getElementById('imageError');
 
-        let selectedFile = null;
-
-        // Upload area click handler
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        // Drag and drop handlers
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileSelect(files[0]);
-            }
-        });
-
-        // File input change handler
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFileSelect(e.target.files[0]);
-            }
-        });
-
-        // Handle file selection
-        function handleFileSelect(file) {
-            // Check file size (10MB limit)
-            if (file.size > 10 * 1024 * 1024) {
-                alert('File terlalu besar! Maksimal 10MB.');
+            if (input.files.length === 0) {
+                errorPara.style.display = 'block';
+                errorPara.textContent = '⚠️ Pilih file gambar terlebih dahulu!';
                 return;
             }
 
-            selectedFile = file;
-            
-            // Show file info
-            fileName.textContent = file.name;
-            fileSize.textContent = formatFileSize(file.size);
-            fileInfo.style.display = 'block';
-            convertBtn.style.display = 'block';
-            resultArea.style.display = 'none';
-        }
-
-        // Convert button handler
-        convertBtn.addEventListener('click', () => {
-            if (!selectedFile) return;
-
-            convertBtn.disabled = true;
-            convertBtn.textContent = '⏳ Mengkonversi...';
-            progressBar.style.display = 'block';
-
-            // Simulate conversion process
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 30;
-                if (progress > 100) progress = 100;
-                
-                progressFill.style.width = progress + '%';
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        completeConversion();
-                    }, 500);
-                }
-            }, 200);
-        });
-
-        // Complete conversion
-        function completeConversion() {
-            // Create a blob URL (this is a demo - in real implementation, you'd upload to a server)
-            const blob = new Blob([selectedFile], { type: selectedFile.type });
-            const url = URL.createObjectURL(blob);
-            
-            // Generate a more realistic looking URL for demo
-            const demoUrl = `https://fileconverter.demo/${generateRandomId()}/${encodeURIComponent(selectedFile.name)}`;
-            
-            urlInput.value = demoUrl;
-            resultArea.style.display = 'block';
-            progressBar.style.display = 'none';
-            
-            convertBtn.disabled = false;
-            convertBtn.textContent = '🚀 Konversi ke URL';
-            
-            // Note: This is a demo URL and won't actually work for file access
-            console.log('Demo URL generated:', demoUrl);
-            console.log('Actual blob URL (for demo purposes):', url);
-        }
-
-        // Copy button handler
-        copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(urlInput.value);
-                successMessage.style.display = 'block';
-                copyBtn.textContent = '✅ Tersalin!';
-                
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                    copyBtn.textContent = '📋 Salin';
-                }, 2000);
-            } catch (err) {
-                // Fallback for older browsers
-                urlInput.select();
-                document.execCommand('copy');
-                successMessage.style.display = 'block';
-                copyBtn.textContent = '✅ Tersalin!';
-                
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                    copyBtn.textContent = '📋 Salin';
-                }, 2000);
+            const file = input.files[0];
+            if (!file.type.startsWith('image/')) {
+                errorPara.style.display = 'block';
+                errorPara.textContent = '⚠️ File harus berupa gambar!';
+                return;
             }
-        });
 
-        // Utility functions
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                urlPara.textContent = e.target.result;
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                resultDiv.style.display = 'block';
+                errorPara.style.display = 'none';
+            };
+            reader.onerror = function() {
+                errorPara.style.display = 'block';
+                errorPara.textContent = '⚠️ Error saat membaca file gambar.';
+            };
+            reader.readAsDataURL(file);
         }
 
-        function generateRandomId() {
-            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        function clearImage() {
+            document.getElementById('imageInput').value = '';
+            document.getElementById('imageResult').style.display = 'none';
+            document.getElementById('imageError').style.display = 'none';
+        }
+
+        function convertAudio() {
+            const input = document.getElementById('audioInput');
+            const resultDiv = document.getElementById('audioResult');
+            const urlPara = document.getElementById('audioUrl');
+            const preview = document.getElementById('audioPreview');
+            const errorPara = document.getElementById('audioError');
+
+            if (input.files.length === 0) {
+                errorPara.style.display = 'block';
+                errorPara.textContent = '⚠️ Pilih file audio terlebih dahulu!';
+                return;
+            }
+
+            const file = input.files[0];
+            if (!file.type.startsWith('audio/')) {
+                errorPara.style.display = 'block';
+                errorPara.textContent = '⚠️ File harus berupa audio!';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                urlPara.textContent = e.target.result;
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                resultDiv.style.display = 'block';
+                errorPara.style.display = 'none';
+            };
+            reader.onerror = function() {
+                errorPara.style.display = 'block';
+                errorPara.textContent = '⚠️ Error saat membaca file audio.';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearAudio() {
+            document.getElementById('audioInput').value = '';
+            document.getElementById('audioResult').style.display = 'none';
+            document.getElementById('audioError').style.display = 'none';
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'978e3a9a339487c5',t:'MTc1NjgyODkxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
+</content>
+    </create_file>
