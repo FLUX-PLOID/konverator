@@ -1,191 +1,117 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Konverator - Ubah Foto dan Audio ke URL</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #000000 0%, #111111 100%); /* Gradient modern hitam ke dark gray */
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .glow-text {
-            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
-            color: #00ffff;
-        }
-        .btn-glow {
-            transition: all 0.3s ease;
-            box-shadow: 0 0 5px #00ffff;
-        }
-        .btn-glow:hover {
-            box-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff;
-            transform: scale(1.05);
-        }
-        .btn-red-glow {
-            box-shadow: 0 0 5px #ff0000;
-        }
-        .btn-red-glow:hover {
-            box-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000;
-            transform: scale(1.05);
-        }
-        .section-glow {
-            background: linear-gradient(135deg, #222222 0%, #333333 100%);
-            border-radius: 12px;
-            border: 1px solid #00ffff;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        }
-        .result-glow {
-            background: linear-gradient(135deg, #111111 0%, #222222 100%);
-            border: 2px solid #00ffff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), inset 0 0 10px rgba(0, 255, 255, 0.1);
-        }
-        .input-glow:focus {
-            outline: none;
-            box-shadow: 0 0 10px #00ffff;
-        }
-        .footer-glow {
-            color: #cccccc;
-            text-shadow: 0 0 5px #00ffff;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>File ke URL Converter</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.3), 0 0 40px rgba(255,0,0,0.2);
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: cyan;
+    }
+    input[type="file"] {
+      margin: 15px 0;
+      padding: 10px;
+      border: 2px dashed cyan;
+      border-radius: 10px;
+      background: #111;
+      color: white;
+      cursor: pointer;
+    }
+    button {
+      background: linear-gradient(45deg, cyan, red);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      margin-top: 20px;
+      border-radius: 10px;
+      border: none;
+      padding: 10px;
+      background: #111;
+      color: cyan;
+      font-size: 0.9rem;
+    }
+    .preview {
+      margin-top: 20px;
+    }
+    .preview img, .preview audio {
+      max-width: 100%;
+      margin-top: 10px;
+    }
+  </style>
 </head>
-<body class="font-sans min-h-screen">
-    <header class="header text-center py-12 px-4">
-        <h1 class="text-4xl md:text-5xl font-bold glow-text mb-2">Konverator</h1>
-        <p class="text-lg md:text-xl text-gray-300">Ubah foto dan audio Anda menjadi URL data modern dan siap pakai.</p>
-    </header>
+<body>
+  <div class="container">
+    <h1>Konversi File ke URL</h1>
+    <input type="file" id="fileInput" accept="image/*,audio/*" />
+    <br>
+    <button onclick="convertFile()">Konversi</button>
+    <textarea id="output" placeholder="Hasil URL muncul di sini..." readonly></textarea>
+    <div class="preview" id="preview"></div>
+  </div>
 
-    <main class="container mx-auto px-4 py-8 max-w-4xl">
-        <!-- Bagian Foto -->
-        <section class="mb-8 section-glow p-6">
-            <h2 class="text-2xl mb-4 glow-text">Konversi Foto ke URL</h2>
-            <div class="space-y-4">
-                <input type="file" id="imageInput" accept="image/*" class="input-glow block w-full p-3 bg-gray-800 border border-cyan-500 rounded-lg text-white">
-                <div class="flex space-x-4">
-                    <button class="btn-glow bg-cyan-400 text-black font-semibold py-2 px-4 rounded-lg" onclick="convertImage()">Konversi Gambar</button>
-                    <button class="btn-red-glow bg-red-500 text-white font-semibold py-2 px-4 rounded-lg" onclick="clearImage()">Bersihkan</button>
-                </div>
-                <div id="imageResult" class="result-glow p-4" style="display: none;">
-                    <p class="font-semibold mb-2 glow-text">URL Gambar:</p>
-                    <p id="imageUrl" class="break-all text-sm bg-gray-900 p-2 rounded mb-4"></p>
-                    <p class="font-semibold mb-2 glow-text">Preview:</p>
-                    <img id="imagePreview" alt="Preview penuh-resolution dari gambar yang dikonsersi, menampilkan detail utuh file" style="max-width: 100%; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); display: none;" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e6604e5-5c4c-440b-ba92-2f3c6c152f70.png">
-                </div>
-                <p id="imageError" class="text-red-500 mt-2 font-semibold glow-text" style="display: none;">⚠️ Error: Pastikan file gambar valid!</p>
-            </div>
-        </section>
+  <script>
+    function convertFile() {
+      const fileInput = document.getElementById("fileInput");
+      const output = document.getElementById("output");
+      const preview = document.getElementById("preview");
 
-        <!-- Bagian Audio -->
-        <section class="section-glow p-6">
-            <h2 class="text-2xl mb-4 glow-text">Konversi Audio ke URL</h2>
-            <div class="space-y-4">
-                <input type="file" id="audioInput" accept="audio/*" class="input-glow block w-full p-3 bg-gray-800 border border-cyan-500 rounded-lg text-white">
-                <div class="flex space-x-4">
-                    <button class="btn-glow bg-cyan-400 text-black font-semibold py-2 px-4 rounded-lg" onclick="convertAudio()">Konversi Audio</button>
-                    <button class="btn-red-glow bg-red-500 text-white font-semibold py-2 px-4 rounded-lg" onclick="clearAudio()">Bersihkan</button>
-                </div>
-                <div id="audioResult" class="result-glow p-4" style="display: none;">
-                    <p class="font-semibold mb-2 glow-text">URL Audio:</p>
-                    <p id="audioUrl" class="break-all text-sm bg-gray-900 p-2 rounded mb-4"></p>
-                    <p class="font-semibold mb-2 glow-text">Preview:</p>
-                    <audio id="audioPreview" controls class="border border-cyan-500 rounded" style="display: none;"></audio>
-                </div>
-                <p id="audioError" class="text-red-500 mt-2 font-semibold glow-text" style="display: none;">⚠️ Error: Pastikan file audio valid!</p>
-            </div>
-        </section>
-    </main>
+      if (!fileInput.files[0]) {
+        alert("Pilih file dulu sayang 😗");
+        return;
+      }
 
-    <footer class="text-center py-6 footer-glow">
-        <p class="text-lg">© 2023 Konverator. Modern, Glow-Enhanced & Ready for Vercel Deployment!</p>
-    </footer>
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataURL = e.target.result;
+        output.value = dataURL;
 
-    <script>
-        function convertImage() {
-            const input = document.getElementById('imageInput');
-            const resultDiv = document.getElementById('imageResult');
-            const urlPara = document.getElementById('imageUrl');
-            const preview = document.getElementById('imagePreview');
-            const errorPara = document.getElementById('imageError');
-
-            if (input.files.length === 0) {
-                errorPara.style.display = 'block';
-                errorPara.textContent = '⚠️ Pilih file gambar terlebih dahulu!';
-                return;
-            }
-
-            const file = input.files[0];
-            if (!file.type.startsWith('image/')) {
-                errorPara.style.display = 'block';
-                errorPara.textContent = '⚠️ File harus berupa gambar!';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                urlPara.textContent = e.target.result;
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                resultDiv.style.display = 'block';
-                errorPara.style.display = 'none';
-            };
-            reader.onerror = function() {
-                errorPara.style.display = 'block';
-                errorPara.textContent = '⚠️ Error saat membaca file gambar.';
-            };
-            reader.readAsDataURL(file);
+        preview.innerHTML = "";
+        if (fileInput.files[0].type.startsWith("image/")) {
+          const img = document.createElement("img");
+          img.src = dataURL;
+          preview.appendChild(img);
+        } else if (fileInput.files[0].type.startsWith("audio/")) {
+          const audio = document.createElement("audio");
+          audio.src = dataURL;
+          audio.controls = true;
+          preview.appendChild(audio);
         }
-
-        function clearImage() {
-            document.getElementById('imageInput').value = '';
-            document.getElementById('imageResult').style.display = 'none';
-            document.getElementById('imageError').style.display = 'none';
-        }
-
-        function convertAudio() {
-            const input = document.getElementById('audioInput');
-            const resultDiv = document.getElementById('audioResult');
-            const urlPara = document.getElementById('audioUrl');
-            const preview = document.getElementById('audioPreview');
-            const errorPara = document.getElementById('audioError');
-
-            if (input.files.length === 0) {
-                errorPara.style.display = 'block';
-                errorPara.textContent = '⚠️ Pilih file audio terlebih dahulu!';
-                return;
-            }
-
-            const file = input.files[0];
-            if (!file.type.startsWith('audio/')) {
-                errorPara.style.display = 'block';
-                errorPara.textContent = '⚠️ File harus berupa audio!';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                urlPara.textContent = e.target.result;
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                resultDiv.style.display = 'block';
-                errorPara.style.display = 'none';
-            };
-            reader.onerror = function() {
-                errorPara.style.display = 'block';
-                errorPara.textContent = '⚠️ Error saat membaca file audio.';
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function clearAudio() {
-            document.getElementById('audioInput').value = '';
-            document.getElementById('audioResult').style.display = 'none';
-            document.getElementById('audioError').style.display = 'none';
-        }
-    </script>
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+  </script>
 </body>
 </html>
-</content>
-    </create_file>
